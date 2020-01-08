@@ -3,6 +3,6 @@
 To run the tests:
 
 * Start NATS
-* Start user microservices
+* Start microservices
 * `go test -v`
 
