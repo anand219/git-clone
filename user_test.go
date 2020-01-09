@@ -7,13 +7,15 @@ import (
 )
 
 var (
-	signupCode        string
-	verificationToken string
-	userID            string
-	emailAddress      string
-	bodyData          string
-	jwt               string
-	err               error
+	signupCode               string
+	verificationToken        string
+	userID                   string
+	userEmailAddress         string
+	platformUserEmailAddress string
+	bodyData                 string
+	jwt                      string
+	adminJwt                 string
+	err                      error
 )
 
 const (
@@ -83,6 +85,47 @@ type UserResponse struct {
 func TestUsers(t *testing.T) {
 	MakeClient()
 
+	t.Run("Sign in as admin", func(t *testing.T) {
+		Client.Post("/v1/api/users/auth").
+			JSON(map[string]string{
+				"email":    "admin@example.com",
+				"password": "adminsecret",
+			}).
+			Expect(t).
+			Status(200).
+			Type("json").
+			AssertFunc(GetBody).
+			Done()
+
+		adminJwt, err = unmarshalStringData(BodyString)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+	})
+
+	t.Run("Create a platform user", func(t *testing.T) {
+		platformUserEmailAddress = MakeEmailAddress()
+		Client.Post("/v1/api/users/platform").
+			AddHeader("Authorization", fmt.Sprintf("Bearer %s", adminJwt)).
+			JSON(map[string]string{"email": platformUserEmailAddress, "platform_role_id": "1"}).
+			Expect(t).
+			Status(200).
+			Type("json").
+			JSONSchema(userSchema).
+			AssertFunc(GetBody).
+			Done()
+		fmt.Printf("Response %s\n", BodyString)
+		userData, err := unmarshalUserData(BodyString)
+		verificationToken = userData.Data.VerificationToken_ //In TEST mode, the verification token is returned in the response instead of being sent in an email
+
+		if err != nil {
+			t.Error(err)
+			return
+		}
+
+	})
+
 	t.Run("Create a signup token", func(t *testing.T) {
 
 		Client.Post("/v1/api/tokens").
@@ -104,10 +147,10 @@ func TestUsers(t *testing.T) {
 	})
 
 	t.Run("sign up with token", func(t *testing.T) {
-		emailAddress = MakeEmailAddress()
+		userEmailAddress = MakeEmailAddress()
 		Client.Post("/v1/api/users").
 			JSON(map[string]string{
-				"email":    emailAddress,
+				"email":    userEmailAddress,
 				"password": PASSWORD,
 				"token":    signupCode,
 			}).
@@ -142,7 +185,7 @@ func TestUsers(t *testing.T) {
 	t.Run("sign in ", func(t *testing.T) {
 		Client.Post("/v1/api/users/auth").
 			JSON(map[string]string{
-				"email":    emailAddress,
+				"email":    userEmailAddress,
 				"password": PASSWORD,
 			}).
 			Expect(t).
