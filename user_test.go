@@ -25,6 +25,7 @@ const (
 // test stores the HTTP testing client preconfigured
 //var client = baloo.New("http://localhost:5000")
 
+//TODO Import these
 type RoleDataTransferType struct {
 	ID    string
 	Name  string
@@ -79,6 +80,11 @@ type StringResponse struct {
 
 type UserResponse struct {
 	Data  UserDataTransferType
+	Error string
+}
+
+type UserListResponse struct {
+	Data  []*UserDataTransferType
 	Error string
 }
 
@@ -213,6 +219,42 @@ func TestUsers(t *testing.T) {
 			AssertFunc(GetBody).
 			Done()
 
+		userData, err := unmarshalUserData(BodyString)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		if userData.Data.Email != userEmailAddress {
+			t.Error("Wrong email address")
+			return
+		}
+
+	})
+
+	t.Run("list users", func(t *testing.T) {
+
+		Client.Get("/v1/api/users/all").
+			Param("id", fmt.Sprint(userID)).
+			AddHeader("Authorization", fmt.Sprintf("Bearer %s", adminJwt)).
+			Expect(t).
+			Status(200).
+			Type("json").
+			//JSONSchema(GeneralResponseSchema).
+			AssertFunc(GetBody).
+			Done()
+
+		fmt.Printf("Body: %s\n", BodyString)
+
+		/*userListData, err := unmarshalUserListData(BodyString)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		if len(userListData.Data) == 0 {
+			t.Error("Empty array")
+			return
+		}*/
+
 	})
 
 }
@@ -224,6 +266,16 @@ func unmarshalUserData(s string) (*UserResponse, error) {
 
 	err := json.Unmarshal([]byte(s), &userData)
 	return &userData, err
+}
+
+func unmarshalUserListData(s string) (*UserListResponse, error) {
+	users := []*UserDataTransferType{}
+	userListData := UserListResponse{
+		Data: users,
+	}
+
+	err := json.Unmarshal([]byte(s), &userListData)
+	return &userListData, err
 }
 
 func unmarshalStringData(s string) (string, error) {
