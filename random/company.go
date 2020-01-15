@@ -1,6 +1,8 @@
 package random
 
 import (
+	"errors"
+
 	"github.com/consensys/bpaas-e2e/dto"
 	"github.com/consensys/bpaas-e2e/util"
 )
@@ -18,10 +20,20 @@ func NewCompany() (*dto.Company, error) {
 		}).
 		Send()
 
-	var response dto.CompanyCreateResponse
-	if resp.Ok {
-		resp.JSON(&response)
-		return &response.Data, nil
+	if err != nil {
+		return nil, err
 	}
-	return nil, err
+
+	var response dto.CompanyCreateResponse
+	err = resp.JSON(&response)
+	if err != nil {
+		return nil, err
+	}
+
+	if response.Error != "" {
+		return nil, errors.New(response.Error)
+	}
+
+	return &response.Data, nil
+
 }

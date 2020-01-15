@@ -20,3 +20,9 @@ type UserListResponse struct {
 	APIResponse
 	Data []User `json:"data"`
 }
+
+// UserCreateResponse struct
+type UserCreateResponse struct {
+	APIResponse
+	Data User `json:"data"`
+}
