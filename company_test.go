@@ -1,7 +1,6 @@
 package end_to_end
 
 import (
-	"fmt"
 	"net/http"
 	"testing"
 
@@ -134,5 +133,3 @@ func TestCompanyListAll(t *testing.T) {
 		t.Errorf("Expected company name to be %s got %s", company.Name, lastCompany.Name)
 	}
 }
-
-
