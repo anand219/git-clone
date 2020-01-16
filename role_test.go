@@ -52,6 +52,12 @@ func TestListAssignableCompanyRoles(t *testing.T) {
 	if len(response.Data) != expected {
 		t.Errorf("Expected %d got %d", expected, len(response.Data))
 	}
+
+	for _, role := range response.Data {
+		if role.Name == constants.ROLE_COMPANY_ADMIN {
+			t.Errorf("%s should be in assignable company roles", constants.ROLE_COMPANY_ADMIN)
+		}
+	}
 }
 func TestListPlatformRoles(t *testing.T) {
 	route := "/v1/api/roles/platform"
@@ -94,5 +100,11 @@ func TestListAssignablePlatformRoles(t *testing.T) {
 	const expected = 2
 	if len(response.Data) != expected {
 		t.Errorf("Expected %d got %d", expected, len(response.Data))
+	}
+
+	for _, role := range response.Data {
+		if role.Name == constants.ROLE_PLATFORM_ADMIN {
+			t.Errorf("%s should be in assignable platform roles", constants.ROLE_PLATFORM_ADMIN)
+		}
 	}
 }
