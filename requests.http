@@ -1,0 +1,49 @@
+
+#Sign in as admin
+
+POST http://localhost:5000/v1/api/users/auth HTTP/1.1
+Content-Type: application/json
+
+{
+    "email":    "admin@example.com",
+    "password": "adminsecret"
+}
+
+###
+
+#Create a platform user
+
+POST http://localhost:5000/v1/api/users/platform HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1NzkwNjI4MjcsInVzZXJfaWQiOiI2NTViYjU4Zi02N2QwLTRmMWEtYjBiNy1lMjg2ZDEzYWUxYjgifQ.vNI5esvteJwaPvNboIkL25GVKJd9qIT4gzaWvxCf0Hk
+
+{
+    "email": "platformuser@example.com",
+    "platform_role_id": "1"
+}
+
+###
+
+#Activate a platform user
+
+POST http://localhost:5000/v1/api/users/platform/activate HTTP/1.1
+Content-Type: application/json
+
+{
+    "token": "4369be42df879b057a9b1f6d8a73ddd2",
+    "password": "secret"
+}
+
+###
+
+#Sign in as a platform user
+
+POST http://localhost:5000/v1/api/users/auth HTTP/1.1
+Content-Type: application/json
+
+{
+    "email":    "platformuser@example.com",
+    "password": "secret"
+}
+
+
