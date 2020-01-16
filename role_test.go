@@ -10,7 +10,6 @@ import (
 )
 
 func TestListCompanyRoles(t *testing.T) {
-
 	route := "/v1/api/roles/company"
 
 	response := dto.RoleListResponse{}
@@ -33,7 +32,6 @@ func TestListCompanyRoles(t *testing.T) {
 	}
 }
 func TestListAssignableCompanyRoles(t *testing.T) {
-
 	route := "/v1/api/roles/company/assignable"
 
 	response := dto.RoleListResponse{}
@@ -56,7 +54,6 @@ func TestListAssignableCompanyRoles(t *testing.T) {
 	}
 }
 func TestListPlatformRoles(t *testing.T) {
-
 	route := "/v1/api/roles/platform"
 
 	response := dto.RoleListResponse{}
@@ -79,7 +76,6 @@ func TestListPlatformRoles(t *testing.T) {
 	}
 }
 func TestListAssignablePlatformRoles(t *testing.T) {
-
 	route := "/v1/api/roles/platform/assignable"
 
 	response := dto.RoleListResponse{}
