@@ -12,3 +12,8 @@ type CompanyRole struct {
 	Company Company
 	Role    Role
 }
+
+type RoleListResponse struct {
+	Data []*Role `json:"data"`
+	APIResponse
+}
