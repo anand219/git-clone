@@ -10,3 +10,9 @@ type Invite struct {
 	IsOutgoing bool
 	RoleID     string
 }
+
+// InviteListResponse struct
+type InviteListResponse struct {
+	Data []Invite `json:"data"`
+	APIResponse
+}

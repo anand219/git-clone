@@ -66,7 +66,7 @@ func TestCompanyList(t *testing.T) {
 
 	before := response.Data
 
-	company, err := random.NewCompany()
+	company, err := util.CreateCompany("")
 	if err != nil {
 		t.Error(err)
 	}
@@ -108,7 +108,7 @@ func TestCompanyListAll(t *testing.T) {
 
 	before := response.Data
 
-	company, err := random.NewCompany()
+	company, err := util.CreateCompany("")
 	if err != nil {
 		t.Error(err)
 	}

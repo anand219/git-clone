@@ -1,5 +1,8 @@
 package util
 
-func CreateCompanyFor() {
+import "encoding/json"
 
+func PrettyJSON(v interface{}) string {
+	b, _ := json.MarshalIndent(v, " ", " ")
+	return string(b)
 }

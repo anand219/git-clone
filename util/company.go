@@ -1,25 +1,26 @@
-package random
+package util
 
 import (
 	"errors"
 
 	"github.com/consensys/bpaas-e2e/dto"
-	"github.com/consensys/bpaas-e2e/util"
+	"github.com/consensys/bpaas-e2e/random"
 )
 
-// NewCompany creates a new random company in db
-func NewCompany() (*dto.Company, error) {
-	randomGenerator := New()
+// CreateCompany creates a random company with the default admin user or the owner of the jwt
+func CreateCompany(jwt string) (*dto.Company, error) {
+	client = AuthorizedAPIClient()
+	if jwt != "" {
+		client = AuthorizedAPIClientWith(jwt)
+	}
 
-	route := "/v1/api/companies"
+	randomGenerator := random.New()
 
-	resp, err := util.AuthorizedAPIClient().
-		Post(route).
+	resp, err := client.Post("/v1/api/companies").
 		JSON(map[string]string{
 			"name": randomGenerator.Company(),
 		}).
 		Send()
-
 	if err != nil {
 		return nil, err
 	}
@@ -35,5 +36,4 @@ func NewCompany() (*dto.Company, error) {
 	}
 
 	return &response.Data, nil
-
 }
