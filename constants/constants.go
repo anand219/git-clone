@@ -6,7 +6,11 @@ const (
 	ADMIN_EMAIL    = "admin@example.com"
 	ADMIN_PASSWORD = "adminsecret"
 
+	SWAGGER_USERNAME = "bpaasdev"
+	SWAGGER_PASSWORD = "password"
+
 	RESPONSE_TYPE_JSON = "json"
+	RESPONSE_TYPE_HTML = "text/html; charset=utf-8"
 
 	TOKEN_TYPE_SIGNUP = "SIGNUP"
 
