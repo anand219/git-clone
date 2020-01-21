@@ -17,6 +17,7 @@ func TestCreateInvite(t *testing.T) {
 			JSON(map[string]interface{}{}).
 			Expect(t).
 			Status(http.StatusBadRequest).
+			Type(constants.RESPONSE_TYPE_JSON).
 			JSON(&dto.APIResponse{Error: "role_id is required"}).
 			Done()
 	})
@@ -29,6 +30,7 @@ func TestCreateInvite(t *testing.T) {
 			}).
 			Expect(t).
 			Status(http.StatusBadRequest).
+			Type(constants.RESPONSE_TYPE_JSON).
 			JSON(&dto.APIResponse{Error: "company_id is required"}).
 			Done()
 	})
@@ -42,6 +44,7 @@ func TestCreateInvite(t *testing.T) {
 			}).
 			Expect(t).
 			Status(http.StatusBadRequest).
+			Type(constants.RESPONSE_TYPE_JSON).
 			JSON(&dto.APIResponse{Error: "invalid email"}).
 			Done()
 	})
@@ -56,6 +59,7 @@ func TestCreateInvite(t *testing.T) {
 			}).
 			Expect(t).
 			Status(http.StatusBadRequest).
+			Type(constants.RESPONSE_TYPE_JSON).
 			JSON(&dto.APIResponse{Error: "invalid email"}).
 			Done()
 	})
@@ -89,6 +93,7 @@ func TestCreateInvite(t *testing.T) {
 			}).
 			Expect(t).
 			Status(http.StatusOK).
+			Type(constants.RESPONSE_TYPE_JSON).
 			JSON(&dto.APIResponse{Status: "inprogress"}).
 			Done()
 	})
@@ -103,6 +108,7 @@ func TestListInvite(t *testing.T) {
 		Get(route).
 		Expect(t).
 		Status(http.StatusOK).
+		Type(constants.RESPONSE_TYPE_JSON).
 		AssertFunc(util.ParseJSON(&response)).
 		Done()
 	before := response.Data
@@ -126,6 +132,7 @@ func TestListInvite(t *testing.T) {
 		Get(route).
 		Expect(t).
 		Status(http.StatusOK).
+		Type(constants.RESPONSE_TYPE_JSON).
 		AssertFunc(util.ParseJSON(&response)).
 		Done()
 
@@ -153,6 +160,7 @@ func TestAcceptInvite(t *testing.T) {
 			JSON(map[string]interface{}{}).
 			Expect(t).
 			Status(http.StatusBadRequest).
+			Type(constants.RESPONSE_TYPE_JSON).
 			JSON(&dto.APIResponse{Error: "invite_id is required"}).
 			Done()
 	})
@@ -179,6 +187,7 @@ func TestAcceptInvite(t *testing.T) {
 			}).
 			Expect(t).
 			Status(http.StatusOK).
+			Type(constants.RESPONSE_TYPE_JSON).
 			JSON(&dto.APIResponse{Status: "inprogress"}).
 			Done()
 	})
@@ -191,6 +200,7 @@ func TestRejectInvite(t *testing.T) {
 			JSON(map[string]interface{}{}).
 			Expect(t).
 			Status(http.StatusBadRequest).
+			Type(constants.RESPONSE_TYPE_JSON).
 			JSON(&dto.APIResponse{Error: "invite_id is required"}).
 			Done()
 	})
@@ -218,6 +228,7 @@ func TestRejectInvite(t *testing.T) {
 			Expect(t).
 			Status(http.StatusOK).
 			JSON(&dto.APIResponse{Status: "inprogress"}).
+			Type(constants.RESPONSE_TYPE_JSON).
 			Done()
 	})
 }

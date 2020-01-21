@@ -16,6 +16,8 @@ func TestSwagger(t *testing.T) {
 			Get(route).
 			Expect(t).
 			Status(http.StatusUnauthorized).
+			Type(constants.RESPONSE_TYPE_JSON).
+			JSON(map[string]interface{}{"message": "Unauthorized"}).
 			Done()
 	})
 
