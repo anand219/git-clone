@@ -22,9 +22,10 @@ func TestSwagger(t *testing.T) {
 	})
 
 	t.Run("authorized access", func(t *testing.T) {
-		request := util.APIClient().Get(route)
-		request.Request.Context.Request.SetBasicAuth(constants.SWAGGER_USERNAME, constants.SWAGGER_PASSWORD)
-		request.Expect(t).
+		util.APIClient().
+			Get(route).
+			SetHeader("Authorization", util.BasicAuth(constants.SWAGGER_USERNAME, constants.SWAGGER_PASSWORD)).
+			Expect(t).
 			Status(http.StatusOK).
 			Type(constants.RESPONSE_TYPE_HTML).
 			Done()
