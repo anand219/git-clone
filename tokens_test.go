@@ -9,35 +9,6 @@ import (
 	"github.com/consensys/bpaas-e2e/util"
 )
 
-var (
-	tokenCode string
-)
-
-type TokensDTO struct {
-	Code string
-}
-
-const tokenSchema = `{
-	"title": "Token",
-	"type": "object",
-	"properties": {
-		"data": {
-			"type": "object",
-			"properties": {
-				"Code": {
-					"type": "string"
-				}
-			}
-		}
-	},
-	"required": ["data"]
-}`
-
-type TokenResponse struct {
-	Data  TokensDTO
-	Error string
-}
-
 func TestTokenCreate(t *testing.T) {
 	const route = "/v1/api/tokens"
 

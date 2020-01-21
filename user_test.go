@@ -284,3 +284,41 @@ func unmarshalStringData(s string) (string, error) {
 	err := json.Unmarshal([]byte(s), &stringData)
 	return stringData.Data, err
 }
+
+func UnmarshalTokenData(s string) (*TokenResponse, error) {
+	tokenData := TokenResponse{
+		Data: TokensDTO{},
+	}
+
+	err := json.Unmarshal([]byte(s), &tokenData)
+	return &tokenData, err
+}
+
+var (
+	tokenCode string
+)
+
+type TokensDTO struct {
+	Code string
+}
+
+const tokenSchema = `{
+	"title": "Token",
+	"type": "object",
+	"properties": {
+		"data": {
+			"type": "object",
+			"properties": {
+				"Code": {
+					"type": "string"
+				}
+			}
+		}
+	},
+	"required": ["data"]
+}`
+
+type TokenResponse struct {
+	Data  TokensDTO
+	Error string
+}
