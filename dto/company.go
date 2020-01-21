@@ -20,3 +20,8 @@ type CompanyListResponse struct {
 	APIResponse
 	Data []Company `json:"data"`
 }
+
+type CompanyListUserActionsResponse struct {
+	APIResponse
+	Data []string `json:"data"`
+}
