@@ -27,7 +27,7 @@ func CreateUser() (*dto.User, string, error) {
 		JSON(map[string]string{
 			"email":    randomGenerator.Email(),
 			"password": randomGenerator.Password(0),
-			"token":    token,
+			"token":    token.Code,
 		}).
 		Send()
 
