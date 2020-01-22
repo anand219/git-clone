@@ -112,7 +112,6 @@ func TestUsers(t *testing.T) {
 
 		var response dto.UserGetResponse
 
-		fmt.Printf("Getting user %s %s\n", userEmailAddress, PASSWORD)
 		util.AuthorizedAPIClientFor(userEmailAddress, PASSWORD).
 			Get(fmt.Sprintf("%s/whoami", route)).
 			//Param("id", fmt.Sprint(userID)).

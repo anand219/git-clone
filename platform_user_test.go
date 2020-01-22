@@ -1,10 +1,11 @@
 package end_to_end
 
 import (
+	"fmt"
 	"net/http"
 	"testing"
 
-	constants "github.com/consensys/bpaas-e2e/constants"
+	"github.com/consensys/bpaas-e2e/constants"
 	"github.com/consensys/bpaas-e2e/dto"
 	"github.com/consensys/bpaas-e2e/random"
 	"github.com/consensys/bpaas-e2e/util"
@@ -40,7 +41,7 @@ func TestPlatformUsers(t *testing.T) {
 			Done()
 
 		//userID = response.Data.ID
-		verificationToken := response.Data.VerificationToken_ //In TEST mode, the verification token is returned in the response instead of being sent in an email
+		verificationToken = response.Data.VerificationToken_ //In TEST mode, the verification token is returned in the response instead of being sent in an email
 
 		if verificationToken == "" {
 			t.Error("No verification token")
@@ -50,9 +51,8 @@ func TestPlatformUsers(t *testing.T) {
 
 	t.Run("Activate a platform user", func(t *testing.T) {
 		var response dto.PlatformUserActivateResponse
-
 		util.APIClient().
-			Post(route).
+			Post(fmt.Sprintf("%s/activate", route)).
 			JSON(map[string]string{
 				"token":    verificationToken,
 				"password": PASSWORD,
