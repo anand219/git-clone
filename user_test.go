@@ -2,7 +2,13 @@ package end_to_end
 
 import (
 	"fmt"
+	"net/http"
 	"testing"
+
+	"github.com/consensys/bpaas-e2e/constants"
+	"github.com/consensys/bpaas-e2e/dto"
+	"github.com/consensys/bpaas-e2e/random"
+	"github.com/consensys/bpaas-e2e/util"
 )
 
 var (
@@ -25,21 +31,12 @@ const (
 //var client = baloo.New("http://localhost:5000")
 
 func TestUsers(t *testing.T) {
-	MakeClient()
+
+	randomGenerator := random.New()
+	route := "/v1/api/users"
 
 	t.Run("Sign in as admin", func(t *testing.T) {
-		Client.Post("/v1/api/users/auth").
-			JSON(map[string]string{
-				"email":    "admin@example.com",
-				"password": "adminsecret",
-			}).
-			Expect(t).
-			Status(200).
-			Type("json").
-			AssertFunc(GetBody).
-			Done()
-
-		adminJwt, err = UnmarshalStringData(BodyString)
+		_, err := util.Authenticate(constants.ADMIN_EMAIL, constants.ADMIN_PASSWORD)
 		if err != nil {
 			t.Error(err)
 			return
@@ -48,73 +45,66 @@ func TestUsers(t *testing.T) {
 
 	t.Run("Create a signup token", func(t *testing.T) {
 
-		Client.Post("/v1/api/tokens").
-			JSON(map[string]string{"token_type": "SIGNUP"}).
+		var response dto.TokenCreateResponse
+
+		util.AuthorizedAPIClient().
+			Post("/v1/api/tokens").
+			JSON(map[string]string{
+				"token_type": "SIGNUP",
+			}).
 			Expect(t).
-			Status(200).
-			Type("json").
-			JSONSchema(UserSchema).
-			AssertFunc(GetBody).
+			Status(http.StatusOK).
+			Type(constants.RESPONSE_TYPE_JSON).
+			AssertFunc(util.ParseJSON(&response)).
 			Done()
 
-		tokenData, err := UnmarshalTokenData(BodyString)
 		if err != nil {
 			t.Error(err)
 			return
 		}
 
-		signupCode = tokenData.Data.Code
+		signupCode = response.Data.Code
 	})
 
 	t.Run("sign up with token", func(t *testing.T) {
-		userEmailAddress = MakeEmailAddress()
-		Client.Post("/v1/api/users").
+
+		var response dto.UserCreateResponse
+		fmt.Printf("Signing up with token %s\n", signupCode)
+		util.APIClient().
+			Post(route).
 			JSON(map[string]string{
-				"email":    userEmailAddress,
+				"email":    randomGenerator.Email(),
 				"password": PASSWORD,
 				"token":    signupCode,
 			}).
 			Expect(t).
-			Status(200).
-			Type("json").
-			JSONSchema(GeneralResponseSchema).
-			AssertFunc(GetBody).
+			Status(http.StatusOK).
+			Type(constants.RESPONSE_TYPE_JSON).
+			AssertFunc(util.ParseJSON(&response)).
 			Done()
 
-		userData, err := UnmarshalUserData(BodyString)
-		if err != nil {
-			t.Error(err)
-			return
-		}
-		userID = userData.Data.ID
-		verificationToken = userData.Data.VerificationToken_ //In TEST mode, the verification token is returned in the response instead of being sent in an email
-
+		userID = response.Data.ID
+		verificationToken = response.Data.VerificationToken_ //In TEST mode, the verification token is returned in the response instead of being sent in an email
 	})
 
 	t.Run("verify", func(t *testing.T) {
-		Client.Post("/v1/api/users/verify").
+
+		var response dto.UserVerifyResponse
+
+		util.APIClient().
+			Post(fmt.Sprintf("%s/verify", route)).
 			JSON(map[string]string{
 				"token": verificationToken,
 			}).
 			Expect(t).
-			Status(200).
+			Status(http.StatusOK).
+			Type(constants.RESPONSE_TYPE_JSON).
+			AssertFunc(util.ParseJSON(&response)).
 			Done()
-
 	})
 
 	t.Run("sign in ", func(t *testing.T) {
-		Client.Post("/v1/api/users/auth").
-			JSON(map[string]string{
-				"email":    userEmailAddress,
-				"password": PASSWORD,
-			}).
-			Expect(t).
-			Status(200).
-			Type("json").
-			AssertFunc(GetBody).
-			Done()
-
-		jwt, err = UnmarshalStringData(BodyString)
+		_, err = util.Authenticate(userEmailAddress, PASSWORD)
 		if err != nil {
 			t.Error(err)
 			return
@@ -123,52 +113,38 @@ func TestUsers(t *testing.T) {
 
 	t.Run("get user", func(t *testing.T) {
 
-		Client.Get("/v1/api/users/whoami").
-			Param("id", fmt.Sprint(userID)).
-			AddHeader("Authorization", fmt.Sprintf("Bearer %s", jwt)).
+		var response dto.UserGetResponse
+
+		util.AuthorizedAPIClientFor(userEmailAddress, PASSWORD).
+			Get(fmt.Sprintf("%s/whoami", route)).
+			//Param("id", fmt.Sprint(userID)).
 			Expect(t).
-			Status(200).
-			Type("json").
-			JSONSchema(tokenSchema).
-			AssertFunc(GetBody).
+			Status(http.StatusOK).
+			Type(constants.RESPONSE_TYPE_JSON).
+			AssertFunc(util.ParseJSON(&response)).
 			Done()
 
-		userData, err := UnmarshalUserData(BodyString)
-		if err != nil {
-			t.Error(err)
-			return
-		}
-		if userData.Data.Email != userEmailAddress {
+		if response.Data.Email != userEmailAddress {
 			t.Error("Wrong email address")
 			return
 		}
-
 	})
+	/*
+		t.Run("list users", func(t *testing.T) {
 
-	t.Run("list users", func(t *testing.T) {
+			var response dto.UserListResponse
+			util.AuthorizedAPIClient().
+				Get(fmt.Sprintf("%s/all", route)).
+				Expect(t).
+				Status(http.StatusOK).
+				Type(constants.RESPONSE_TYPE_JSON).
+				AssertFunc(util.ParseJSON(&response)).
+				Done()
 
-		Client.Get("/v1/api/users/all").
-			Param("id", fmt.Sprint(userID)).
-			AddHeader("Authorization", fmt.Sprintf("Bearer %s", adminJwt)).
-			Expect(t).
-			Status(200).
-			Type("json").
-			JSONSchema(GeneralResponseSchema).
-			AssertFunc(GetBody).
-			Done()
+			if len(response.Data) == 0 {
+				t.Error("Empty array")
+				return
+			}
 
-		fmt.Printf("Body: %s\n", BodyString)
-
-		userListData, err := UnmarshalUserListData(BodyString)
-		if err != nil {
-			t.Error(err)
-			return
-		}
-		if len(userListData.Data) == 0 {
-			t.Error("Empty array")
-			return
-		}
-
-	})
-
+		})*/
 }
