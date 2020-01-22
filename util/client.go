@@ -47,7 +47,7 @@ func AuthorizedAPIClientWith(jwt string) *baloo.Client {
 
 // AuthorizedAPIClientFor initializes  and returns an authorized api client
 func AuthorizedAPIClientFor(username string, password string) *baloo.Client {
-	jwt, err := Authenticate(constants.ADMIN_EMAIL, constants.ADMIN_PASSWORD)
+	jwt, err := Authenticate(username, password)
 	if err != nil {
 		log.Fatalln(err)
 	}
