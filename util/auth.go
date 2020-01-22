@@ -18,9 +18,9 @@ func Authenticate(email string, password string) (string, error) {
 		Send()
 
 	if resp.Ok {
-		tokenResponse := dto.APIResponse{}
-		resp.JSON(&tokenResponse)
-		if jwt, ok := tokenResponse.Data.(string); ok {
+		authResponse := dto.APIResponse{}
+		resp.JSON(&authResponse)
+		if jwt, ok := authResponse.Data.(string); ok {
 			return jwt, nil
 		}
 	}

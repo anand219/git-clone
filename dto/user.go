@@ -26,3 +26,13 @@ type UserCreateResponse struct {
 	APIResponse
 	Data User `json:"data"`
 }
+
+type UserVerifyResponse struct {
+	APIResponse
+	Data User `json:"data"`
+}
+
+type UserGetResponse struct {
+	APIResponse
+	Data User `json:"data"`
+}
