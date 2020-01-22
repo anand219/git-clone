@@ -1,88 +1,74 @@
 package end_to_end
 
 import (
+	"net/http"
 	"testing"
+
+	constants "github.com/consensys/bpaas-e2e/constants"
+	"github.com/consensys/bpaas-e2e/dto"
+	"github.com/consensys/bpaas-e2e/random"
+	"github.com/consensys/bpaas-e2e/util"
 )
 
 func TestPlatformUsers(t *testing.T) {
-	/*
-		helper.MakeClient()
+	var (
+		err               error
+		verificationToken string
+	)
 
-		t.Run("Sign in as admin", func(t *testing.T) {
-			helper.Client.Post("/v1/api/users/auth").
-				JSON(map[string]string{
-					"email":    "admin@example.com",
-					"password": "adminsecret",
-				}).
-				Expect(t).
-				Status(200).
-				Type("json").
-				AssertFunc(helper.GetBody).
-				Done()
+	const (
+		PASSWORD = "Password1!"
+	)
 
-			adminJwt, err = helper.UnmarshalStringData(BodyString)
-			if err != nil {
-				t.Error(err)
-				return
-			}
-		})
+	route := "/v1/api/users/platform"
+	randomGenerator := random.New()
+	userEmailAddress := randomGenerator.Email()
 
-		t.Run("Create a platform user", func(t *testing.T) {
-			platformUserEmailAddress = MakeEmailAddress()
-			Client.Post("/v1/api/users/platform").
-				AddHeader("Authorization", fmt.Sprintf("Bearer %s", adminJwt)).
-				JSON(map[string]string{"email": platformUserEmailAddress, "platform_role_id": "1"}).
-				Expect(t).
-				Status(200).
-				Type("json").
-				JSONSchema(UserSchema).
-				AssertFunc(GetBody).
-				Done()
+	t.Run("Create a platform user", func(t *testing.T) {
+		var response dto.PlatformUserCreateResponse
 
-			userData, err := UnmarshalUserData(BodyString)
-			verificationToken = userData.Data.VerificationToken_ //In TEST mode, the verification token is returned in the response instead of being sent in an email
+		util.AuthorizedAPIClient().
+			Post(route).
+			JSON(map[string]string{
+				"email":            userEmailAddress,
+				"platform_role_id": "1",
+			}).
+			Expect(t).
+			Status(http.StatusOK).
+			Type(constants.RESPONSE_TYPE_JSON).
+			AssertFunc(util.ParseJSON(&response)).
+			Done()
 
-			if err != nil {
-				t.Error(err)
-				return
-			}
+		//userID = response.Data.ID
+		verificationToken := response.Data.VerificationToken_ //In TEST mode, the verification token is returned in the response instead of being sent in an email
 
-		})
+		if verificationToken == "" {
+			t.Error("No verification token")
+		}
 
-		t.Run("Activate a platform user", func(t *testing.T) {
-			Client.Post("/v1/api/users/platform/activate").
-				AddHeader("Authorization", fmt.Sprintf("Bearer %s", adminJwt)).
-				JSON(map[string]string{"token": verificationToken, "password": PASSWORD}).
-				Expect(t).
-				Status(200).
-				Type("json").
-				JSONSchema(UserSchema).
-				AssertFunc(GetBody).
-				Done()
+	})
 
-			fmt.Printf("Activate response %s\n", BodyString)
-		})
+	t.Run("Activate a platform user", func(t *testing.T) {
+		var response dto.PlatformUserActivateResponse
 
-		t.Run("Sign in a platform user", func(t *testing.T) {
-			Client.Post("/v1/api/users/auth").
-				JSON(map[string]string{
-					"email":    platformUserEmailAddress,
-					"password": PASSWORD,
-				}).
-				Expect(t).
-				Status(200).
-				Type("json").
-				//JSONSchema(userSchema).
-				AssertFunc(GetBody).
-				Done()
+		util.APIClient().
+			Post(route).
+			JSON(map[string]string{
+				"token":    verificationToken,
+				"password": PASSWORD,
+			}).
+			Expect(t).
+			Status(http.StatusOK).
+			Type(constants.RESPONSE_TYPE_JSON).
+			AssertFunc(util.ParseJSON(&response)).
+			Done()
+	})
 
-			fmt.Printf("Sign in response %s\n", BodyString)
-
-			_, err = UnmarshalStringData(BodyString)
-			if err != nil {
-				t.Error(err)
-				return
-			}
-
-		})*/
+	t.Run("Sign in a platform user", func(t *testing.T) {
+		_, err = util.Authenticate(userEmailAddress, PASSWORD)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+	})
 }

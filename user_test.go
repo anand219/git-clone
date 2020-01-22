@@ -11,26 +11,21 @@ import (
 	"github.com/consensys/bpaas-e2e/util"
 )
 
-var (
-	signupCode               string
-	verificationToken        string
-	userID                   string
-	userEmailAddress         string
-	platformUserEmailAddress string
-	bodyData                 string
-	jwt                      string
-	adminJwt                 string
-	err                      error
-)
-
-const (
-	PASSWORD = "Password1!"
-)
-
 // test stores the HTTP testing client preconfigured
 //var client = baloo.New("http://localhost:5000")
 
 func TestUsers(t *testing.T) {
+
+	var (
+		signupCode        string
+		verificationToken string
+		userEmailAddress  string
+		err               error
+	)
+
+	const (
+		PASSWORD = "Password1!"
+	)
 
 	randomGenerator := random.New()
 	route := "/v1/api/users"
@@ -43,6 +38,7 @@ func TestUsers(t *testing.T) {
 		}
 	})
 
+	//TODO: Make this a util function
 	t.Run("Create a signup token", func(t *testing.T) {
 
 		var response dto.TokenCreateResponse
@@ -69,11 +65,12 @@ func TestUsers(t *testing.T) {
 	t.Run("sign up with token", func(t *testing.T) {
 
 		var response dto.UserCreateResponse
+		userEmailAddress = randomGenerator.Email()
 		fmt.Printf("Signing up with token %s\n", signupCode)
 		util.APIClient().
 			Post(route).
 			JSON(map[string]string{
-				"email":    randomGenerator.Email(),
+				"email":    userEmailAddress,
 				"password": PASSWORD,
 				"token":    signupCode,
 			}).
@@ -83,7 +80,7 @@ func TestUsers(t *testing.T) {
 			AssertFunc(util.ParseJSON(&response)).
 			Done()
 
-		userID = response.Data.ID
+		//userID = response.Data.ID
 		verificationToken = response.Data.VerificationToken_ //In TEST mode, the verification token is returned in the response instead of being sent in an email
 	})
 
@@ -103,7 +100,7 @@ func TestUsers(t *testing.T) {
 			Done()
 	})
 
-	t.Run("sign in ", func(t *testing.T) {
+	t.Run("sign in", func(t *testing.T) {
 		_, err = util.Authenticate(userEmailAddress, PASSWORD)
 		if err != nil {
 			t.Error(err)
@@ -115,6 +112,7 @@ func TestUsers(t *testing.T) {
 
 		var response dto.UserGetResponse
 
+		fmt.Printf("Getting user %s %s\n", userEmailAddress, PASSWORD)
 		util.AuthorizedAPIClientFor(userEmailAddress, PASSWORD).
 			Get(fmt.Sprintf("%s/whoami", route)).
 			//Param("id", fmt.Sprint(userID)).
@@ -129,22 +127,22 @@ func TestUsers(t *testing.T) {
 			return
 		}
 	})
-	/*
-		t.Run("list users", func(t *testing.T) {
 
-			var response dto.UserListResponse
-			util.AuthorizedAPIClient().
-				Get(fmt.Sprintf("%s/all", route)).
-				Expect(t).
-				Status(http.StatusOK).
-				Type(constants.RESPONSE_TYPE_JSON).
-				AssertFunc(util.ParseJSON(&response)).
-				Done()
+	t.Run("list users", func(t *testing.T) {
 
-			if len(response.Data) == 0 {
-				t.Error("Empty array")
-				return
-			}
+		var response dto.UserListResponse
+		util.AuthorizedAPIClient().
+			Get(fmt.Sprintf("%s/all", route)).
+			Expect(t).
+			Status(http.StatusOK).
+			Type(constants.RESPONSE_TYPE_JSON).
+			AssertFunc(util.ParseJSON(&response)).
+			Done()
 
-		})*/
+		if len(response.Data) == 0 {
+			t.Error("Empty array")
+			return
+		}
+
+	})
 }
