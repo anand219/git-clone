@@ -101,10 +101,11 @@ func TestPlatformUserCreate(t *testing.T) {
 	})
 
 	t.Run("Sign in a platform user before activation", func(t *testing.T) {
-		_, err = util.Authenticate(userEmailAddress, PASSWORD)
-		if err == nil {
-			t.Error("Allowed sign in before activation")
-			return
+		var response dto.UserGetResponse
+		response = GetUser(t, http.StatusUnauthorized, userEmailAddress, PASSWORD)
+
+		if response.Error == "" {
+			t.Error("Allowed access before activation")
 		}
 	})
 

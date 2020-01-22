@@ -11,8 +11,40 @@ import (
 	"github.com/consensys/bpaas-e2e/util"
 )
 
+const (
+	ROUTE = "/v1/api/users"
+)
+
 // test stores the HTTP testing client preconfigured
 //var client = baloo.New("http://localhost:5000")
+func GetUser(t *testing.T, httpStatus int, email string, password string) (response dto.UserGetResponse) {
+	route := fmt.Sprintf("%s/whoami", ROUTE)
+	util.AuthorizedAPIClientFor(email, password).
+		Get(route).
+		Expect(t).
+		Status(httpStatus).
+		Type(constants.RESPONSE_TYPE_JSON).
+		AssertFunc(util.ParseJSON(&response)).
+		Done()
+
+	return response
+}
+
+func SuspendUser(t *testing.T, userID string) (response dto.UserSuspendResponse) {
+	route := fmt.Sprintf("%s/suspend", ROUTE)
+	util.AuthorizedAPIClient().
+		Post(route).
+		JSON(map[string]string{
+			"user_id": userID,
+		}).
+		Expect(t).
+		Status(http.StatusOK).
+		Type(constants.RESPONSE_TYPE_JSON).
+		AssertFunc(util.ParseJSON(&response)).
+		Done()
+
+	return response
+}
 
 func TestUsers(t *testing.T) {
 
@@ -112,19 +144,13 @@ func TestUsers(t *testing.T) {
 
 		var response dto.UserGetResponse
 
-		util.AuthorizedAPIClientFor(userEmailAddress, PASSWORD).
-			Get(fmt.Sprintf("%s/whoami", route)).
-			//Param("id", fmt.Sprint(userID)).
-			Expect(t).
-			Status(http.StatusOK).
-			Type(constants.RESPONSE_TYPE_JSON).
-			AssertFunc(util.ParseJSON(&response)).
-			Done()
+		response = GetUser(t, http.StatusOK, userEmailAddress, PASSWORD)
 
 		if response.Data.Email != userEmailAddress {
 			t.Error("Wrong email address")
 			return
 		}
+		userID = response.Data.ID
 	})
 
 	t.Run("list users", func(t *testing.T) {
@@ -143,5 +169,10 @@ func TestUsers(t *testing.T) {
 			return
 		}
 
+	})
+
+	t.Run("suspend user", func(t *testing.T) {
+		SuspendUser(t, userID)
+		//GetUser(t, http.StatusForbidden, userEmailAddress, PASSWORD)
 	})
 }
