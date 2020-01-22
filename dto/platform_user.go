@@ -10,3 +10,8 @@ type PlatformUserActivateResponse struct {
 	APIResponse
 	Data User `json:"data"`
 }
+
+type PlatformUserCancelResponse struct {
+	APIResponse
+	UserID string `json:"user_id"`
+}
