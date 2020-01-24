@@ -30,10 +30,11 @@ func TestCompanyCreate(t *testing.T) {
 	t.Run("with name", func(t *testing.T) {
 		var response dto.CompanyCreateResponse
 
+		companyName := randomGenerator.Company()
 		util.AuthorizedAPIClient().
 			Post(route).
 			JSON(map[string]string{
-				"name": randomGenerator.Company(),
+				"name": companyName,
 			}).
 			Expect(t).
 			Status(http.StatusOK).
@@ -45,8 +46,8 @@ func TestCompanyCreate(t *testing.T) {
 			t.Errorf("Expected email to be %s got %s", constants.ADMIN_EMAIL, response.Data.Admin.Email)
 		}
 
-		if response.Data.Name != randomGenerator.Company() {
-			t.Errorf("Expected company name to be %s got %s", randomGenerator.Company(), response.Data.Name)
+		if response.Data.Name != companyName {
+			t.Errorf("Expected company name to be %s got %s", companyName, response.Data.Name)
 		}
 	})
 }
