@@ -1,13 +1,7 @@
 package e2e
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"math/rand"
-	"net/http"
 	"sync"
-	"time"
 
 	baloo "gopkg.in/h2non/baloo.v3"
 )
@@ -50,6 +44,7 @@ type UserDataTransferType struct {
 	VerificationToken_ string
 }
 
+/*
 var UserSchema = fmt.Sprintf(`{
 	"title": "Token",
 	"type": "object",
@@ -129,7 +124,7 @@ type UserListResponse struct {
 }
 
 const DefinitionsSchema = `{
-	
+
 
 }`
 
@@ -149,7 +144,7 @@ const GeneralResponseSchema = `{
 					"type": "string"
 				}
 			]
-			
+
 		}
 	},
 	"required": ["data"]
@@ -158,3 +153,4 @@ const GeneralResponseSchema = `{
 func Init() {
 	MakeClient()
 }
+*/
