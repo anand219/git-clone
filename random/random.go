@@ -42,6 +42,10 @@ func (g *Generator) Password(i uint64) string {
 	return fmt.Sprintf("Password%d%d", g.uid, i)
 }
 
+func (g *Generator) PhoneNumber(i uint64) string {
+	return fmt.Sprintf("%d-%s", i, GenerateRandomBytes(9))
+}
+
 func GenerateRandomBytes(byteCount int) string {
 
 	b := make([]byte, byteCount)

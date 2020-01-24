@@ -33,7 +33,6 @@ type UserSuspendResponse struct {
 	Status string `json:"status"`
 }
 
-
 /*
 type UserSuspendResponse struct {
 	APIResponse
@@ -41,6 +40,22 @@ type UserSuspendResponse struct {
 }
 */
 type UserVerifyResponse struct {
+	APIResponse
+	Data User `json:"data"`
+}
+
+//UserPasswordUpdateResponse struct
+type UserPasswordUpdateResponse struct {
+	APIResponse
+	Data User `json:"data"`
+}
+
+type UserPasswordResetResponse struct {
+	APIResponse
+	Data User `json:"data"`
+}
+
+type UserProfileUpdateResponse struct {
 	APIResponse
 	Data User `json:"data"`
 }
