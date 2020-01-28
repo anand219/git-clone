@@ -46,4 +46,10 @@ Content-Type: application/json
     "password": "secret"
 }
 
+###
 
+#List company roles
+
+GET http://localhost:5000/v1/api/roles/company HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Nzk5MjUyNTcsInVzZXJfaWQiOiI2NTE2YmY5Ny04OGVlLTQyYjEtOTA0Yy1iODZkOWQxZGEwMjgifQ.nv-iHCOPIOvPVYhYDeDhxq0EWLrDL9xo2arLYurqRc8

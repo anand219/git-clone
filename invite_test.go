@@ -1,6 +1,7 @@
 package e2e
 
 import (
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -83,14 +84,20 @@ func TestCreateInvite(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
+		fmt.Printf("Here is the companyOperatorRole %+v\n", companyOperatorRole)
+		fmt.Printf("Here is the company %+v\n", company)
+		fmt.Printf("Here is the usere %+v\n", user)
+		json := map[string]interface{}{
+			"role_id":        companyOperatorRole.ID,
+			"company_id":     company.ID,
+			"receiver_email": user.Email,
+		}
+
+		fmt.Printf("%+v\n", json)
 
 		util.AuthorizedAPIClient().
 			Post(route).
-			JSON(map[string]interface{}{
-				"role_id":        companyOperatorRole.ID,
-				"company_id":     company.ID,
-				"receiver_email": user.Email,
-			}).
+			JSON(json).
 			Expect(t).
 			Status(http.StatusOK).
 			Type(constants.RESPONSE_TYPE_JSON).
