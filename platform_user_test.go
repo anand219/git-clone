@@ -25,8 +25,7 @@ func CreatePlatformUser(t *testing.T, emailAddress string) (response dto.Platfor
 	util.AuthorizedAPIClient().
 		Post(route).
 		JSON(map[string]string{
-			"email":            emailAddress,
-			"platform_role_id": "1",
+			"email": emailAddress,
 		}).
 		Expect(t).
 		Status(http.StatusOK).
@@ -87,59 +86,47 @@ func TestPlatformUserCreate(t *testing.T) {
 
 		response := CreatePlatformUser(t, userEmailAddress)
 
+		fmt.Printf("Response %+v\n", response.Data)
+
 		verificationToken = response.Data.VerificationToken_ //In TEST mode, the verification token is returned in the response instead of being sent in an email
 		if verificationToken == "" {
 			t.Error("No verification token")
 		}
 	})
+	/*
+		t.Run("Activate a platform user with wrong code", func(t *testing.T) {
+			var response dto.PlatformUserActivateResponse
+			response = ActivatePlatformUser(t, "WRONG")
+			if response.Error == "" {
+				t.Error("Allowed activation with wrong code")
+			}
+		})
 
-	t.Run("Activate a platform user with wrong code", func(t *testing.T) {
-		var response dto.PlatformUserActivateResponse
-		response = ActivatePlatformUser(t, "WRONG")
-		if response.Error == "" {
-			t.Error("Allowed activation with wrong code")
-		}
-	})
 
-	/*t.Run("Sign in a platform user before activation", func(t *testing.T) {
-		var response dto.UserGetResponse
-		response = GetUser(t, http.StatusUnauthorized, userEmailAddress, PASSWORD)
 
-		if response.Error == "" {
-			t.Error("Allowed access before activation")
-		}
-	})*/
+		t.Run("Activate a platform user with correct code", func(t *testing.T) {
+			var response dto.PlatformUserActivateResponse
+			response = ActivatePlatformUser(t, verificationToken)
+			userID = response.Data.ID
+			if response.Error != "" {
+				t.Error(response.Error)
+			}
+		})
 
-	t.Run("Activate a platform user with correct code", func(t *testing.T) {
-		var response dto.PlatformUserActivateResponse
-		response = ActivatePlatformUser(t, verificationToken)
-		userID = response.Data.ID
-		if response.Error != "" {
-			t.Error(response.Error)
-		}
-	})
+		t.Run("Sign in a platform user", func(t *testing.T) {
+			_, err = util.Authenticate(userEmailAddress, PASSWORD)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+		})
 
-	t.Run("Sign in a platform user", func(t *testing.T) {
-		_, err = util.Authenticate(userEmailAddress, PASSWORD)
-		if err != nil {
-			t.Error(err)
-			return
-		}
-	})
-
-	t.Run("Cancel a platform user", func(t *testing.T) {
-		response := CancelPlatformUser(t, userID)
-		if response.Error != "" {
-			t.Error(response.Error)
-		}
-	})
-
-	/*t.Run("Sign in a cancelled platform user", func(t *testing.T) {
-		_, err = util.Authenticate(userEmailAddress, PASSWORD)
-		if err == nil {
-			t.Error("Signed in a cancelled user")
-			return
-		}
-	})*/
+		t.Run("Cancel a platform user", func(t *testing.T) {
+			response := CancelPlatformUser(t, userID)
+			if response.Error != "" {
+				t.Error(response.Error)
+			}
+		})
+	*/
 
 }
