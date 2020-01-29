@@ -173,104 +173,103 @@ func TestUsers(t *testing.T) {
 		}
 
 	})
-	/*
-		t.Run("update password", func(t *testing.T) {
 
-			var response dto.APIResponse
+	t.Run("update password", func(t *testing.T) {
 
-			util.AuthorizedAPIClientFor(userEmailAddress, PASSWORD).
-				Put(fmt.Sprintf("%s/password", USERS_ROUTE)).
-				JSON(map[string]string{
-					"current_password": PASSWORD,
-					"new_password":     NEW_PASSWORD,
-				}).
-				Expect(t).
-				Status(http.StatusOK).
-				Type(constants.RESPONSE_TYPE_JSON).
-				AssertFunc(util.ParseJSON(&response)).
-				Done()
+		var response dto.APIResponse
 
-			_, err = util.Authenticate(userEmailAddress, NEW_PASSWORD)
-			if err != nil {
-				t.Error(err)
-				return
-			}
-		})
+		util.AuthorizedAPIClientFor(userEmailAddress, PASSWORD).
+			Put(fmt.Sprintf("%s/password", USERS_ROUTE)).
+			JSON(map[string]string{
+				"current_password": PASSWORD,
+				"new_password":     NEW_PASSWORD,
+			}).
+			Expect(t).
+			Status(http.StatusOK).
+			Type(constants.RESPONSE_TYPE_JSON).
+			AssertFunc(util.ParseJSON(&response)).
+			Done()
 
-		t.Run("reset password", func(t *testing.T) {
+		_, err = util.Authenticate(userEmailAddress, NEW_PASSWORD)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+	})
 
-			var response dto.UserPasswordResetResponse
-			util.AuthorizedAPIClientFor(userEmailAddress, NEW_PASSWORD).
-				Post(fmt.Sprintf("%s/password/reset", USERS_ROUTE)).
-				JSON(map[string]string{
-					"email": userEmailAddress,
-				}).
-				Expect(t).
-				Status(http.StatusOK).
-				Type(constants.RESPONSE_TYPE_JSON).
-				AssertFunc(util.ParseJSON(&response)).
-				Done()
+	t.Run("reset password", func(t *testing.T) {
 
-			if response.Data.VerificationToken_ == "" {
-				t.Error("No verfication token. Ensure user microservice is run with EXECUTION_MODE=test")
-			} else {
-				verificationToken = response.Data.VerificationToken_
-			}
-		})
+		var response dto.UserPasswordResetResponse
+		util.AuthorizedAPIClientFor(userEmailAddress, NEW_PASSWORD).
+			Post(fmt.Sprintf("%s/password/reset", USERS_ROUTE)).
+			JSON(map[string]string{
+				"email": userEmailAddress,
+			}).
+			Expect(t).
+			Status(http.StatusOK).
+			Type(constants.RESPONSE_TYPE_JSON).
+			AssertFunc(util.ParseJSON(&response)).
+			Done()
 
-		t.Run("confirm reset password", func(t *testing.T) {
+		if response.Data.VerificationToken_ == "" {
+			t.Error("No verfication token. Ensure user microservice is run with EXECUTION_MODE=test")
+		} else {
+			verificationToken = response.Data.VerificationToken_
+		}
+	})
 
-			var response dto.UserPasswordResetResponse
-			util.APIClient().
-				Post(fmt.Sprintf("%s/password/reset/confirm", USERS_ROUTE)).
-				JSON(map[string]string{
-					"token":    verificationToken,
-					"password": PASSWORD,
-				}).
-				Expect(t).
-				Status(http.StatusOK).
-				Type(constants.RESPONSE_TYPE_JSON).
-				AssertFunc(util.ParseJSON(&response)).
-				Done()
+	t.Run("confirm reset password", func(t *testing.T) {
 
-			if response.Data.VerificationToken_ != "" {
-				t.Error("No verfication token. Ensure user microservice is run with EXECUTION_MODE=test")
-			}
+		var response dto.UserPasswordResetResponse
+		util.APIClient().
+			Post(fmt.Sprintf("%s/password/reset/confirm", USERS_ROUTE)).
+			JSON(map[string]string{
+				"token":    verificationToken,
+				"password": PASSWORD,
+			}).
+			Expect(t).
+			Status(http.StatusOK).
+			Type(constants.RESPONSE_TYPE_JSON).
+			AssertFunc(util.ParseJSON(&response)).
+			Done()
 
-			_, err = util.Authenticate(userEmailAddress, PASSWORD)
-			if err != nil {
-				t.Error(err)
-				return
-			}
-		})
+		if response.Data.VerificationToken_ != "" {
+			t.Error("No verfication token. Ensure user microservice is run with EXECUTION_MODE=test")
+		}
 
-		t.Run("update profile", func(t *testing.T) {
+		_, err = util.Authenticate(userEmailAddress, PASSWORD)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+	})
 
-			var response dto.UserProfileUpdateResponse
-			util.AuthorizedAPIClientFor(userEmailAddress, PASSWORD).
-				Put(fmt.Sprintf("%s/profile", USERS_ROUTE)).
-				JSON(map[string]string{
-					"gender":       "male",
-					"name":         NEW_NAME,
-					"country_code": "123",
-					"phone_number": randomGenerator.PhoneNumber(2),
-				}).
-				Expect(t).
-				Status(http.StatusOK).
-				Type(constants.RESPONSE_TYPE_JSON).
-				AssertFunc(util.ParseJSON(&response)).
-				Done()
+	t.Run("update profile", func(t *testing.T) {
 
-			profileResponse := GetUser(t, http.StatusOK, userEmailAddress, PASSWORD)
-			if profileResponse.Data.Name != NEW_NAME {
-				t.Errorf("Name did not change: '%s'", profileResponse.Data.Name)
-			}
-		})
+		var response dto.UserProfileUpdateResponse
+		util.AuthorizedAPIClientFor(userEmailAddress, PASSWORD).
+			Put(fmt.Sprintf("%s/profile", USERS_ROUTE)).
+			JSON(map[string]string{
+				"gender":       "male",
+				"name":         NEW_NAME,
+				"country_code": "123",
+				"phone_number": randomGenerator.PhoneNumber(2),
+			}).
+			Expect(t).
+			Status(http.StatusOK).
+			Type(constants.RESPONSE_TYPE_JSON).
+			AssertFunc(util.ParseJSON(&response)).
+			Done()
 
-		t.Run("suspend user", func(t *testing.T) {
-			SuspendUser(t, userID)
-			//GetUser(t, http.StatusForbidden, userEmailAddress, PASSWORD)
-		})
-	*/
+		profileResponse := GetUser(t, http.StatusOK, userEmailAddress, PASSWORD)
+		if profileResponse.Data.Name != NEW_NAME {
+			t.Errorf("Name did not change: '%s'", profileResponse.Data.Name)
+		}
+	})
+
+	t.Run("suspend user", func(t *testing.T) {
+		SuspendUser(t, userID)
+		//GetUser(t, http.StatusForbidden, userEmailAddress, PASSWORD)
+	})
 
 }

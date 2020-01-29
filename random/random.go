@@ -3,7 +3,9 @@ package random
 import (
 	cryptoRand "crypto/rand"
 	"fmt"
+	"math/rand"
 	"sync/atomic"
+	"time"
 )
 
 var (
@@ -43,7 +45,7 @@ func (g *Generator) Password(i uint64) string {
 }
 
 func (g *Generator) PhoneNumber(i uint64) string {
-	return fmt.Sprintf("%d-%s", i, GenerateRandomBytes(9))
+	return fmt.Sprintf("%d%s", i, GenerateRandomDigits(9))
 }
 
 func GenerateRandomBytes(byteCount int) string {
@@ -53,4 +55,14 @@ func GenerateRandomBytes(byteCount int) string {
 		return ""
 	}
 	return fmt.Sprintf("%x", b)
+}
+
+func GenerateRandomDigits(byteCount int) (result string) {
+	rand.Seed(time.Now().UnixNano())
+	result = ""
+	for i := 0; i < byteCount; i++ {
+		result = fmt.Sprintf("%s%d", result, rand.Intn(10))
+	}
+
+	return result
 }
