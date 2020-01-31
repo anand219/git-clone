@@ -5,7 +5,7 @@ import (
 )
 
 // GenerateToken of the given type
-func GenerateToken(tokenType string) (string, error) {
+func GenerateToken(tokenType string) (*dto.Token, error) {
 	resp, err := AuthorizedAPIClient().
 		Post("/v1/api/tokens").
 		JSON(map[string]string{
@@ -16,7 +16,7 @@ func GenerateToken(tokenType string) (string, error) {
 	if resp.Ok {
 		tokenResponse := dto.TokenCreateResponse{}
 		resp.JSON(&tokenResponse)
-		return tokenResponse.Data.Code, nil
+		return &tokenResponse.Data, nil
 	}
-	return "", err
+	return nil, err
 }

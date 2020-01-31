@@ -1,6 +1,7 @@
 package util
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/consensys/bpaas-e2e/dto"
@@ -17,12 +18,21 @@ func Authenticate(email string, password string) (string, error) {
 		}).
 		Send()
 
-	if resp.Ok {
-		tokenResponse := dto.APIResponse{}
-		resp.JSON(&tokenResponse)
-		if jwt, ok := tokenResponse.Data.(string); ok {
-			return jwt, nil
-		}
+	if err != nil {
+		return "", err
+	}
+
+	tokenResponse := dto.APIResponse{}
+	err = resp.JSON(&tokenResponse)
+	if err != nil {
+		return "", err
+	}
+
+	if tokenResponse.Error != "" {
+		return "", errors.New(tokenResponse.Error)
+	}
+	if jwt, ok := tokenResponse.Data.(string); ok {
+		return jwt, nil
 	}
 
 	return "", err

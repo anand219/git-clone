@@ -1,8 +1,11 @@
 package random
 
 import (
+	cryptoRand "crypto/rand"
 	"fmt"
+	"math/rand"
 	"sync/atomic"
+	"time"
 )
 
 var (
@@ -23,20 +26,43 @@ func New() *Generator {
 
 // Name returns a name
 func (g *Generator) Name() string {
-	return fmt.Sprintf("User %d", g.uid)
+	return fmt.Sprintf("User %d-%s", g.uid, GenerateRandomBytes(16))
 }
 
 // Company returns the company name
 func (g *Generator) Company() string {
-	return fmt.Sprintf("Company %d PVT LTD", g.uid)
+	return fmt.Sprintf("Company %d-%s PVT LTD", g.uid, GenerateRandomBytes(16))
 }
 
 // Email returns the email
 func (g *Generator) Email() string {
-	return fmt.Sprintf("email%d@yopmail.com", g.uid)
+	return fmt.Sprintf("email-%d-%s-@yopmail.com", g.uid, GenerateRandomBytes(16))
 }
 
 // Password generates a password for the i the time
 func (g *Generator) Password(i uint64) string {
 	return fmt.Sprintf("Password%d%d", g.uid, i)
+}
+
+func (g *Generator) PhoneNumber(i uint64) string {
+	return fmt.Sprintf("%d%s", i, GenerateRandomDigits(9))
+}
+
+func GenerateRandomBytes(byteCount int) string {
+
+	b := make([]byte, byteCount)
+	if _, err := cryptoRand.Read(b); err != nil {
+		return ""
+	}
+	return fmt.Sprintf("%x", b)
+}
+
+func GenerateRandomDigits(byteCount int) (result string) {
+	rand.Seed(time.Now().UnixNano())
+	result = ""
+	for i := 0; i < byteCount; i++ {
+		result = fmt.Sprintf("%s%d", result, rand.Intn(10))
+	}
+
+	return result
 }

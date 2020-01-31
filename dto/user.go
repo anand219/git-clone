@@ -26,3 +26,41 @@ type UserCreateResponse struct {
 	APIResponse
 	Data User `json:"data"`
 }
+
+// UserSuspendResponse struct
+type UserSuspendResponse struct {
+	APIResponse
+	Status string `json:"status"`
+}
+
+/*
+type UserSuspendResponse struct {
+	APIResponse
+	Data User `json:"data"`
+}
+*/
+type UserVerifyResponse struct {
+	APIResponse
+	Data User `json:"data"`
+}
+
+//UserPasswordUpdateResponse struct
+type UserPasswordUpdateResponse struct {
+	APIResponse
+	Data User `json:"data"`
+}
+
+type UserPasswordResetResponse struct {
+	APIResponse
+	Data User `json:"data"`
+}
+
+type UserProfileUpdateResponse struct {
+	APIResponse
+	Data User `json:"data"`
+}
+
+type UserGetResponse struct {
+	APIResponse
+	Data User `json:"data"`
+}

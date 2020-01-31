@@ -1,64 +1,62 @@
-package random
+package util
 
 import (
 	"errors"
 
 	"github.com/consensys/bpaas-e2e/constants"
 	"github.com/consensys/bpaas-e2e/dto"
-	"github.com/consensys/bpaas-e2e/util"
+	"github.com/consensys/bpaas-e2e/random"
 )
 
-// RUser struct
-type RUser struct {
-	User     *dto.User
-	Password string
-}
+var (
+	errorInvalidUser = errors.New("Invalid user")
+)
 
-// NewUser creates a new random company in db
-func NewUser() (*RUser, error) {
-	randomGenerator := New()
-	token, err := util.GenerateToken(constants.TOKEN_TYPE_SIGNUP)
+// CreateUser creates a new random user in db
+func CreateUser() (*dto.User, string, error) {
+	randomGenerator := random.New()
+	token, err := GenerateToken(constants.TOKEN_TYPE_SIGNUP)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	route := "/v1/api/users"
 
-	resp, err := util.APIClient().
+	res, err := APIClient().
 		Post(route).
 		JSON(map[string]string{
 			"email":    randomGenerator.Email(),
 			"password": randomGenerator.Password(0),
-			"token":    token,
+			"token":    token.Code,
 		}).
 		Send()
 
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	var response dto.UserCreateResponse
-	err = resp.JSON(&response)
+	err = res.JSON(&response)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	if response.Error != "" {
-		return nil, errors.New(response.Error)
+		return nil, "", errors.New(response.Error)
 	}
-	return &RUser{
-		User:     &response.Data,
-		Password: randomGenerator.Password(0),
-	}, nil
 
+	return &response.Data, randomGenerator.Password(0), nil
 }
 
 // Verify the user
-func (r *RUser) Verify() error {
-	resp, err := util.APIClient().
+func Verify(user *dto.User) error {
+	if user == nil {
+		return errorInvalidUser
+	}
+	resp, err := APIClient().
 		Post("/v1/api/users/verify").
 		JSON(map[string]string{
-			"token": r.User.VerificationToken_,
+			"token": user.VerificationToken_,
 		}).
 		Send()
 

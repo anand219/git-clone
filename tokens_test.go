@@ -1,105 +1,125 @@
-package end_to_end
+package e2e
 
 import (
-	"encoding/json"
+	"net/http"
 	"testing"
+
+	"github.com/consensys/bpaas-e2e/constants"
+	"github.com/consensys/bpaas-e2e/dto"
+	"github.com/consensys/bpaas-e2e/util"
 )
 
-var (
-	tokenCode string
-)
+func TestTokenCreate(t *testing.T) {
+	const route = "/v1/api/tokens"
 
-type TokensDTO struct {
-	Code string
-}
-
-const tokenSchema = `{
-	"title": "Token",
-	"type": "object",
-	"properties": {
-		"data": {
-			"type": "object",
-			"properties": {
-				"Code": {
-					"type": "string"
-				}
-			}
-		}
-	},
-	"required": ["data"]
-}`
-
-type TokenResponse struct {
-	Data  TokensDTO
-	Error string
-}
-
-func TestTokens(t *testing.T) {
-
-	MakeClient()
-	t.Run("Create a signup token", func(t *testing.T) {
-
-		Client.Post("/v1/api/tokens").
-			JSON(map[string]string{"token_type": "SIGNUP"}).
+	t.Run("with empty body", func(t *testing.T) {
+		util.AuthorizedAPIClient().
+			Post(route).
+			JSON(map[string]interface{}{}).
 			Expect(t).
-			Status(200).
-			Type("json").
-			JSONSchema(tokenSchema).
-			AssertFunc(GetBody).
+			Status(http.StatusBadRequest).
+			Type(constants.RESPONSE_TYPE_JSON).
+			JSON(&dto.APIResponse{Error: "token type is required"}).
 			Done()
-
-		bodyData, err := UnmarshalTokenData(BodyString)
-		if err != nil {
-			t.Error(err)
-			return
-		}
-
-		tokenCode = bodyData.Data.Code
 	})
 
-	t.Run("get token", func(t *testing.T) {
-
-		Client.Get("/v1/api/tokens").
-			AddQuery("token_code", tokenCode).
-			Expect(t).
-			Status(200).
-			Type("json").
-			JSONSchema(tokenSchema).
-			AssertFunc(GetBody).
-			Done()
-
-		bodyData := TokenResponse{
-			Data: TokensDTO{},
-		}
-
-		err := json.Unmarshal([]byte(BodyString), &bodyData)
-		if err != nil {
-			t.Error(err)
-		}
-	})
-
-	t.Run("sign up with token", func(t *testing.T) {
-		emailAddress := MakeEmailAddress()
-		Client.Post("/v1/api/users").
-			JSON(map[string]string{
-				"email":    emailAddress,
-				"password": "Password1!",
-				"token":    tokenCode,
+	t.Run("with token_type", func(t *testing.T) {
+		var response dto.TokenCreateResponse
+		util.AuthorizedAPIClient().
+			Post(route).
+			JSON(map[string]interface{}{
+				"token_type": constants.TOKEN_TYPE_SIGNUP,
 			}).
 			Expect(t).
-			Status(200).
-			Type("json").
-			JSONSchema(GeneralResponseSchema).
-			AssertFunc(GetBody).
+			Status(http.StatusOK).
+			Type(constants.RESPONSE_TYPE_JSON).
+			AssertFunc(util.ParseJSON(&response)).
 			Done()
+
+		if response.Data.Code == "" {
+			t.Error("Should generate token")
+		}
+		if response.Data.User != nil {
+			t.Error("Should be nil")
+		}
+		if response.Data.Type != constants.TOKEN_TYPE_SIGNUP {
+			t.Errorf("Expected token type to be %s got %s", constants.TOKEN_TYPE_SIGNUP, response.Data.Type)
+		}
+	})
+
+	t.Run("with token_type and user_id", func(t *testing.T) {
+		user, _, err := util.CreateUser()
+		if err != nil {
+			t.Error(err)
+		}
+		var response dto.TokenCreateResponse
+		util.AuthorizedAPIClient().
+			Post(route).
+			JSON(map[string]interface{}{
+				"token_type": constants.TOKEN_TYPE_SIGNUP,
+				"user_id":    user.ID,
+			}).
+			Expect(t).
+			Type(constants.RESPONSE_TYPE_JSON).
+			AssertFunc(util.ParseJSON(&response)).
+			Done()
+
+		if response.Data.Code == "" {
+			t.Error("Should generate token")
+		}
+		if response.Data.User == nil {
+			t.Error("Should return user")
+		}
+		if response.Data.Type != constants.TOKEN_TYPE_SIGNUP {
+			t.Errorf("Expected token type to be %s got %s", constants.TOKEN_TYPE_SIGNUP, response.Data.Type)
+		}
+		if response.Data.User.ID != user.ID {
+			t.Errorf("Expected user id to be %s got %s", user.ID, response.Data.User.ID)
+		}
 	})
 }
 
-func UnmarshalTokenData(s string) (*TokenResponse, error) {
-	tokenData := TokenResponse{
-		Data: TokensDTO{},
-	}
+func TestTokenGet(t *testing.T) {
+	const route = "/v1/api/tokens"
 
-	err := json.Unmarshal([]byte(s), &tokenData)
-	return &tokenData, err
+	t.Run("with empty body", func(t *testing.T) {
+		util.AuthorizedAPIClient().
+			Get(route).
+			JSON(map[string]interface{}{}).
+			Expect(t).
+			Status(http.StatusBadRequest).
+			Type(constants.RESPONSE_TYPE_JSON).
+			JSON(&dto.APIResponse{Error: "token_code or token_id is required"}).
+			Done()
+	})
+
+	t.Run("with token_code", func(t *testing.T) {
+		token, err := util.GenerateToken(constants.TOKEN_TYPE_SIGNUP)
+		if err != nil {
+			t.Error(err)
+		}
+		util.AuthorizedAPIClient().
+			Get(route).
+			AddQuery("token_code", token.Code).
+			Expect(t).
+			Status(http.StatusOK).
+			Type(constants.RESPONSE_TYPE_JSON).
+			JSON(&dto.APIResponse{Data: token}).
+			Done()
+	})
+
+	t.Run("with token_id", func(t *testing.T) {
+		token, err := util.GenerateToken(constants.TOKEN_TYPE_SIGNUP)
+		if err != nil {
+			t.Error(err)
+		}
+		util.AuthorizedAPIClient().
+			Get(route).
+			AddQuery("token_id", token.ID).
+			Expect(t).
+			Status(http.StatusOK).
+			Type(constants.RESPONSE_TYPE_JSON).
+			JSON(&dto.APIResponse{Data: token}).
+			Done()
+	})
 }
