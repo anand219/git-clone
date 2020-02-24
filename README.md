@@ -2,8 +2,7 @@
 
 To run the tests:
 
-* Start NATS
-* Start API Gateway
-* Start microservices
-* `go test -v`
+* `make start`
+* `make test -v`
+
 
